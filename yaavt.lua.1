@@ -1,0 +1,241 @@
+.TH  yaavt.lua  1 " 30 March 2024"
+
+.SH SYNOPSIS
+ 
+.P
+yaavt.lua (Yet Another Audio Video Transcoder) is a lua script that uses ffmpeg to transcode/modify audio and video files. 
+.SH RUNNING
+ 
+.P
+yaavt.lua is a lua script, so it can be run using 
+.na
+lua yaavt.lua
+.ad n
+.nop or by using linux\(aqs "binfmt" system to recognize lua scripts. 
+.SH USAGE
+ 
+.nf
+
+  yaavt.lua formats [\-all]                                 \- print list of known output formats
+  yaavt.lua show <path> [path] ...                         \- print media/codec details of <path>
+  yaavt.lua convert [options] <in path> <out path>         \- convert file at <in path> writing to <outpath>
+  yaavt.lua batch [options] <path> [path] ...              \- batch convert a list of file paths
+.fi
+.ad b
+.nop  
+.SH OPTIONS
+  
+.P
+
+.br
+ 
+.TP
+.B -f <fmt>
+ set output format to use
+    
+.P
+
+.br
+ 
+.TP
+.B -w <width>
+ scale video to <width> preseving aspect ratio
+    
+.P
+
+.br
+ 
+.TP
+.B -h <height>
+ scale video to <height> preseving aspect ratio
+    
+.P
+
+.br
+ 
+.TP
+.B -s <width>x<height>
+ scale video to <width> and <height>
+    
+.P
+
+.br
+ 
+.TP
+.B -mono
+ encode mono audio
+    
+.P
+
+.br
+ 
+.TP
+.B -af <low>:<high>
+ filter (select) audio frequencies between <low> and <high> Hz
+    
+.P
+
+.br
+ 
+.TP
+.B -af speech
+ filter (select) audio frequencies between 300 and 3000 Hz
+    
+.P
+
+.br
+ 
+.TP
+.B -af speech-tight
+ filter (select) audio frequencies between 400 and 1000 Hz
+    
+.P
+
+.br
+ 
+.TP
+.B -af tight
+ filter (select) audio frequencies between 200 and 4000 Hz
+    
+.P
+
+.br
+ 
+.TP
+.B -af mid
+ filter (select) audio frequencies between  60 and 6000 Hz
+    
+.P
+
+.br
+ 
+.TP
+.B -af wide
+ filter (select) audio frequencies between  10 and 8000 Hz
+    
+.P
+
+.br
+ 
+.TP
+.B -vol <percent>
+ set volume as a percent of the current volume
+    
+.P
+
+.br
+ 
+.TP
+.B -n
+ normalize volume
+    
+.P
+
+.br
+ 
+.TP
+.B -volnorm
+ normalize volume
+    
+.P
+
+.br
+ 
+.TP
+.B -vbr:a <value>
+ activate audio variable bit rate
+    
+.P
+
+.br
+ 
+.TP
+.B -q:a <value>
+ activate audio variable bit rate
+    
+.P
+
+.br
+ 
+.TP
+.B -threads <n>
+ number of threads to run
+    
+.P
+
+.br
+ 
+.TP
+.B -r90
+ rotate video 90 degrees
+    
+.P
+
+.br
+ 
+.TP
+.B -r180
+ rotate video 180 degrees
+    
+.P
+
+.br
+ 
+.TP
+.B -r270
+ rotate video 270 degrees
+    
+.P
+
+.br
+ 
+.TP
+.B -rot90
+ rotate video 90 degrees
+    
+.P
+
+.br
+ 
+.TP
+.B -rot180
+ rotate video 180 degrees
+    
+.P
+
+.br
+ 
+.TP
+.B -rot270
+ rotate video 270 degrees
+    
+.P
+
+.br
+ 
+.TP
+.B -fps <value>
+ change video frame rate
+    
+.P
+
+.br
+ 
+.TP
+.B -di
+ deinterlace video
+    
+.P
+
+.br
+ 
+.TP
+.B -novideo
+ don\(aqt include video in output
+    
+.br
+ 
+.TP
+.B -noaudio
+ don\(aqt include audio in output
+   
