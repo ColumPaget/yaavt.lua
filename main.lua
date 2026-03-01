@@ -1,3 +1,5 @@
+yaavt_version="2.0"
+
 
 function List()
 local alist, i, item
@@ -69,15 +71,22 @@ Show(config)
 elseif config.action == "convert"
 then
 output_formats:setup(config.outformat)
-convert:process(config)
+convert:process_item(config, config.inputs[1], config.inputs[2])
 elseif config.action == "batch"
 then
 output_formats:setup(config.outformat)
 convert:batch_process(config)
+elseif config.action == "join"
+then
+output_formats:setup(config.outformat)
+convert:join_process(config)
 elseif config.action == "formats"
 then
 output_formats:display()
 elseif config.action == "help"
 then
 command_line:help()
+elseif config.action == "version"
+then
+print("yaavt.lua "..yaavt_version)
 end

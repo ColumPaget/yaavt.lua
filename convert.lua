@@ -42,24 +42,23 @@ print(errors)
 end,
 
 
-process_item=function(self, input, output)
+process=function(self, config, input, output)
 local str
 
-if filesys.exists(input) == false
-then
-	print("ERROR: input file '"..input.."' does not exist")
-else
   str=ffmpeg:convert_command(input, output, config)
   print(str)
   ffcmd=stream.STREAM("cmd:"..str, "r +stderr pty")
   self:read_output(ffcmd)
-end
 end,
 
 
 
-process=function(self, config)
-self:process_item(config.inputs[1], config.inputs[2])
+process_item=function(self, config, input, output)
+
+if filesys.exists(input) == false then print("ERROR: input file '"..input.."' does not exist")
+else self:process(config, input, output)
+end
+
 end,
 
 
@@ -68,13 +67,35 @@ local i, item, str
 
 for i,item in ipairs(config.inputs)
 do
-if strutil.strlen(item) > 0
+  if strutil.strlen(item) > 0
+  then
+    str=filesys.filename(item) .. config.container
+    self:process_item(config, item, str)
+  end
+end
+
+end,
+
+
+
+
+join_process=function(self, config)
+local i, item, outpath
+local str=""
+
+for i,item in ipairs(config.inputs)
+do
+  if strutil.strlen(item) > 0 then str=str .. item .. "|" end
+end
+
+outpath=config.outputpath
+
+if strutil.strlen(outpath) == 0
 then
-str=filesys.filename(item) .. config.container
-self:process_item(item, str)
-print("")
+outpath=filesys.filename(config.inputs[1]).."-joined" .. config.container
 end
-end
+
+self:process(config, str, outpath)
 
 end
 

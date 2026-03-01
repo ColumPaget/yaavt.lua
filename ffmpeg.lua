@@ -138,7 +138,7 @@ toks=strutil.TOKENIZER(line, "\\S|,", "m")
 tok=toks:next()
 while tok ~= nil
 do
-  if tok == "Duration:" then details.duration=processing_time:parse_duration(toks:next()) 
+  if tok == "Duration:" then details.duration=details.duration + processing_time:parse_duration(toks:next()) 
   elseif tok == "Stream" then self:parse_stream(toks, details) 
   elseif string.sub(tok, 1, 5) == "time=" then details.position=processing_time:parse_duration(string.sub(tok, 6)) 
   elseif string.sub(tok, 1, 5) == "size=" then
@@ -410,63 +410,97 @@ end,
 
 
 
+setup_joinfilter=function(self, inputs)
+local toks, str, join_filter
+local fcount=0
+local cmd=""
+
+join_filter = " -filter_complex '"
+toks=strutil.TOKENIZER(inputs, "|", "Q")
+str=toks:next()
+while str ~= nil
+do
+  if strutil.strlen(str) > 0
+	then
+     cmd=cmd .. " -i \"" .. str .. "\" " 
+     join_filter=join_filter .. "["..tostring(fcount)..":v:0]"
+     join_filter=join_filter .. "["..tostring(fcount)..":a:0]"
+     fcount=fcount + 1
+  end
+
+  str=toks:next()
+end
+
+join_filter=join_filter.."concat=n=" ..tostring(fcount) .. ":v=1:a=1[outv][outa]' -map '[outv]' -map '[outa]' "
+
+return cmd .. join_filter
+end,
+
+
+
+
 convert_command=function(self, input, output, config)
-local str, acodec, vcodec
-
-str="ffmpeg -nostdin -i \""..input.."\" " 
-
-if config.threads > 0 then str=str .. " -threads " .. tostring(config.threads) end
-
-if config.novideo == true then str=str .. " -map 0 -map -0:v" end
-if config.noaudio == true then str=str .. " -map 0 -map -0:a" end
+local cmd, str, acodec, vcodec
 
 
-if config.fps ~= nil then str=str.." -vf fps=fps="..config.fps end
-if config.deinterlace ~= nil then str=str.." -vf "..config.deinterlace end
+cmd="ffmpeg -nostdin "
+
+if config.action == "join" then cmd=cmd ..  self:setup_joinfilter(input)
+else cmd=cmd .. " -i " .. input .. " "
+end
+
+if config.threads > 0 then cmd=cmd .. " -threads " .. tostring(config.threads) end
+
+if config.novideo == true then cmd=cmd .. " -map 0 -map -0:v" end
+if config.noaudio == true then cmd=cmd .. " -map 0 -map -0:a" end
+
+
+if config.fps ~= nil then cmd=cmd .." -vf fps=fps="..config.fps end
+if config.deinterlace ~= nil then cmd=cmd .." -vf "..config.deinterlace end
 
 
 if config.width > 0
 then
-	if config.height == 0 then str=str.." -vf scale="..tostring(config.width)..":-2"
-	else str=str.." -vf scale="..tostring(config.width)..":"..tostring(config.height)
+	if config.height == 0 then cmd=cmd .." -vf scale="..tostring(config.width)..":-2"
+	else cmd=cmd .." -vf scale="..tostring(config.width)..":"..tostring(config.height)
 	end
-elseif config.height > 0 then str=str.." -vf scale=-2:" .. tostring(config.height)
+elseif config.height > 0 then cmd=cmd .." -vf scale=-2:" .. tostring(config.height)
 end
 
 if config.transpose ~= nil
 then
-	if config.transpose == "rot90" then str=str.." -vf 'transpose=2'"
-	elseif config.transpose == "rot180" then str=str.." -vf 'transpose=2,transpose=2'"
-	elseif config.transpose == "rot270" then str=str.." -vf 'transpose=2,transpose=2,transpose=2'"
+	if config.transpose == "rot90" then cmd=cmd .." -vf 'transpose=2'"
+	elseif config.transpose == "rot180" then cmd=cmd .." -vf 'transpose=2,transpose=2'"
+	elseif config.transpose == "rot270" then cmd=cmd .." -vf 'transpose=2,transpose=2,transpose=2'"
 	end
 end
 
 
-if config.audio_filter ~= nil then str=str .. self:audio_filter(config.audio_filter) end
-if config.volume ~= nil then str=str .. self:setup_volume(config.volume) end
+if config.audio_filter ~= nil then cmd=cmd .. self:audio_filter(config.audio_filter) end
+if config.volume ~= nil then cmd=cmd .. self:setup_volume(config.volume) end
 
-if config.loudnorm == true then str=str .. " -af loudnorm " end
+if config.loudnorm == true then cmd=cmd .. " -af loudnorm " end
 
-if config.threads > 0 then str=str.." -threads " .. tostring(config.threads) end
+if config.threads > 0 then cmd=cmd .." -threads " .. tostring(config.threads) end
 
-if config.audiochannels ~= nil then str=str.." -ac " .. tostring(config.audiochannels) end
+if config.audiochannels ~= nil then cmd=cmd .." -ac " .. tostring(config.audiochannels) end
 
 if strutil.strlen(config.acodec) > 0 and config.acodec ~= "none"
 then
 acodec=self:translate_codec("audio", config.acodec)
-str=str .. " -acodec " .. acodec .. " ".. audio_encoders:format_args(acodec, config)
+cmd=cmd .. " -acodec " .. acodec .. " ".. audio_encoders:format_args(acodec, config)
 end
 
 if strutil.strlen(config.vcodec) > 0 and config.vcodec ~= "none"
 then 
 	vcodec=self:translate_codec("video", config.vcodec)
-  str=str .. " -vcodec " .. vcodec
-  if vcodec == "libx264" and strutil.strlen(config.encoding_speed) > 0 then str=str.." -preset " .. config.encoding_speed end
+  cmd=cmd .. " -vcodec " .. vcodec
+  if vcodec == "libx264" and strutil.strlen(config.encoding_speed) > 0 then cmd=cmd .." -preset " .. config.encoding_speed end
 end
 
-str=str .. " \"" ..  path_reformats:process(output) .. "\""
+cmd=cmd .. " \"" ..  path_reformats:process(output) .. "\""
 
-return str
+return cmd
 end
 
 }
