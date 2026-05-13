@@ -1,4 +1,4 @@
-yaavt_version="2.0"
+yaavt_version="2.1"
 
 
 function List()
@@ -60,10 +60,12 @@ end
 
 
 
+process.configure("nosu mdwe security='untrusted+nonet+nopid+noipc' ")
 
 StdOut=stream.STREAM("stdout:", "w")
 path_reformats:defaults()
 config=command_line:parse(arg)
+
 
 if config.action == "show"
 then

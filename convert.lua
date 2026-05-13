@@ -33,8 +33,12 @@ str=strutil.trim(str)
 ffmpeg:parse_output(str, details)
 if details.duration > 0 then self:output_status(details) end
 
-if string.find(str, "Error") ~= nil then errors=errors .. str .. " " end
-if string.find(str, "Unrecognized") ~= nil then errors=errors .. str .. " " end
+if string.find(str, "Error") ~= nil then errors=errors .. str .. " "
+elseif string.find(str, "Unrecognized") ~= nil then errors=errors .. str .. " "
+elseif string.find(str, "Invalid data found") ~= nil then errors=errors .. str .. " " 
+elseif string.find(str, "No such ") ~= nil then errors=errors .. str .. " " 
+end
+
 str=S:multi_readto("\r\n")
 end
 

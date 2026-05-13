@@ -639,7 +639,7 @@ then
 -- in convert mode usage is <options> <infile> <outfile>
 if #conf.inputs ~= 2
 then
-	print("ERROR: 'convert requires input and an output file path, and no other paths")
+	print("ERROR: 'convert' requires input and an output file path, and no other paths. Did you mean 'batch'?")
 	os.exit(1)
 end
 
@@ -1154,7 +1154,7 @@ local cmd, str, acodec, vcodec
 cmd="ffmpeg -nostdin "
 
 if config.action == "join" then cmd=cmd ..  self:setup_joinfilter(input)
-else cmd=cmd .. " -i " .. input .. " "
+else cmd=cmd .. " -i '" .. input .. "' "
 end
 
 if config.threads > 0 then cmd=cmd .. " -threads " .. tostring(config.threads) end
@@ -1206,7 +1206,7 @@ then
   if vcodec == "libx264" and strutil.strlen(config.encoding_speed) > 0 then cmd=cmd .." -preset " .. config.encoding_speed end
 end
 
-cmd=cmd .. " \"" ..  path_reformats:process(output) .. "\""
+cmd=cmd .. " '" ..  path_reformats:process(output) .. "'"
 
 return cmd
 end
@@ -1250,8 +1250,12 @@ str=strutil.trim(str)
 ffmpeg:parse_output(str, details)
 if details.duration > 0 then self:output_status(details) end
 
-if string.find(str, "Error") ~= nil then errors=errors .. str .. " " end
-if string.find(str, "Unrecognized") ~= nil then errors=errors .. str .. " " end
+if string.find(str, "Error") ~= nil then errors=errors .. str .. " "
+elseif string.find(str, "Unrecognized") ~= nil then errors=errors .. str .. " "
+elseif string.find(str, "Invalid data found") ~= nil then errors=errors .. str .. " " 
+elseif string.find(str, "No such ") ~= nil then errors=errors .. str .. " " 
+end
+
 str=S:multi_readto("\r\n")
 end
 
@@ -1320,7 +1324,7 @@ end
 
 
 
-yaavt_version="2.0"
+yaavt_version="2.1"
 
 
 function List()
@@ -1382,10 +1386,12 @@ end
 
 
 
+process.configure("nosu mdwe security='untrusted+nonet+nopid+noipc' ")
 
 StdOut=stream.STREAM("stdout:", "w")
 path_reformats:defaults()
 config=command_line:parse(arg)
+
 
 if config.action == "show"
 then

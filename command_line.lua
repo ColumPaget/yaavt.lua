@@ -184,7 +184,7 @@ then
 -- in convert mode usage is <options> <infile> <outfile>
 if #conf.inputs ~= 2
 then
-	print("ERROR: 'convert requires input and an output file path, and no other paths")
+	print("ERROR: 'convert' requires input and an output file path, and no other paths. Did you mean 'batch'?")
 	os.exit(1)
 end
 

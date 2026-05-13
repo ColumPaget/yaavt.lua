@@ -446,7 +446,7 @@ local cmd, str, acodec, vcodec
 cmd="ffmpeg -nostdin "
 
 if config.action == "join" then cmd=cmd ..  self:setup_joinfilter(input)
-else cmd=cmd .. " -i " .. input .. " "
+else cmd=cmd .. " -i '" .. input .. "' "
 end
 
 if config.threads > 0 then cmd=cmd .. " -threads " .. tostring(config.threads) end
@@ -498,7 +498,7 @@ then
   if vcodec == "libx264" and strutil.strlen(config.encoding_speed) > 0 then cmd=cmd .." -preset " .. config.encoding_speed end
 end
 
-cmd=cmd .. " \"" ..  path_reformats:process(output) .. "\""
+cmd=cmd .. " '" ..  path_reformats:process(output) .. "'"
 
 return cmd
 end
